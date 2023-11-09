@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -78,6 +79,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Image gif1 = Image.asset("assets/images/waves_1.gif");
   Image gif2 = Image.asset("assets/images/waves_2.gif");
   Image gif3 = Image.asset("assets/images/waves_3.gif");
+  Image ending1 = Image.asset(
+      "assets/images/ending_1.gif"); // this one fades to transparent to reveal the answer, which has text color the same as bg color and a white/contrasting triangle
 
   static var _random = new Random();
   static var _diceface = _random.nextInt(3) + 1;
@@ -96,7 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
         _diceface = _random.nextInt(3) + 1;
+        stop();
         getTimestamp();
+        start();
         if (_diceface == 1) {
           heavyImpact();
           setState(() {
@@ -150,6 +155,52 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  bool active = false;
+  Timer? timer;
+  Timer? refresh;
+  Stopwatch stopwatch = Stopwatch();
+  Duration duration = const Duration(seconds: 5);
+
+  _CountdownState() {
+    // this is just so the time remaining text is updated
+    refresh = Timer.periodic(
+        const Duration(milliseconds: 100), (_) => setState(() {}));
+  }
+
+  void start() {
+    setState(() {
+      active = true;
+      timer = Timer(duration, () {
+        stop();
+        img = ending1;
+      });
+      stopwatch
+        ..reset()
+        ..start();
+    });
+  }
+
+  void stop() {
+    setState(() {
+      active = false;
+      timer?.cancel();
+      stopwatch.stop();
+    });
+  }
+
+  int secondsRemaining() {
+    return duration.inSeconds -
+        context.watch<ShakeTime>().shakeTime; //stopwatch.elapsed.inSeconds;
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    refresh?.cancel();
+    stopwatch.stop();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -170,6 +221,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             img,
             Text(context.watch<ShakeTime>().shakeTime.toString()),
+            if (active) Text(secondsRemaining().toString()),
+            if (active)
+              TextButton(onPressed: stop, child: const Text('Stop'))
+            else
+              TextButton(onPressed: start, child: const Text('Start')),
           ],
         ),
       ),
