@@ -204,6 +204,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+List<String> magicText = ["Hi", "How are you", "Howdy", "Yeehaw", "Hoo"];
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   late Image img;
@@ -281,6 +283,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Stopwatch stopwatch = Stopwatch();
   Duration duration = const Duration(seconds: 5);
 
+  String result = '';
+
   _CountdownState() {
     // this is just so the time remaining text is updated
     refresh = Timer.periodic(
@@ -293,6 +297,9 @@ class _MyHomePageState extends State<MyHomePage> {
       timer = Timer(duration, () {
         stop();
         img = ending1;
+
+        _diceface = _random.nextInt(5) + 1;
+        result = magicText[_diceface];
       });
       stopwatch
         ..reset()
@@ -340,6 +347,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             img,
+            Text(result),
             Text(context.watch<ShakeTime>().shakeTime.toString()),
             if (active) Text(secondsRemaining().toString()),
             if (active)
