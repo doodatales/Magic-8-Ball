@@ -2,10 +2,24 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shake/shake.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => ShakeTime())],
+      child: const MyApp()));
+}
+
+class ShakeTime with ChangeNotifier {
+  int _shakeTime = 0;
+
+  int get shakeTime => _shakeTime;
+
+  void setShake(int time) {
+    _shakeTime = time;
+    notifyListeners();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -68,11 +82,13 @@ class _MyHomePageState extends State<MyHomePage> {
   static var _random = new Random();
   static var _diceface = _random.nextInt(3) + 1;
 
+  late ShakeDetector detector;
+
   void initState() {
     super.initState();
     img = Image.asset("assets/images/empty.png");
 
-    ShakeDetector detector = ShakeDetector.autoStart(
+    detector = ShakeDetector.autoStart(
       onPhoneShake: () {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -80,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         );
         _diceface = _random.nextInt(3) + 1;
+        getTimestamp();
         if (_diceface == 1) {
           heavyImpact();
           setState(() {
@@ -99,13 +116,20 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       },
       minimumShakeCount: 1,
-      shakeSlopTimeMS: 500,
+      shakeSlopTimeMS: 500, // this is length of each gif
       shakeCountResetTime: 200,
       shakeThresholdGravity: 2.7,
     );
 
+    /*  if () {
+      print('greater than 5');
+    } */
     // To close: detector.stopListening();
     // ShakeDetector.waitForStart() waits for user to call detector.startListening();
+  }
+
+  void getTimestamp() {
+    context.read<ShakeTime>().setShake(detector.mShakeTimestamp);
   }
 
   void _incrementCounter() {
@@ -145,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             img,
+            Text(context.watch<ShakeTime>().shakeTime.toString()),
           ],
         ),
       ),
