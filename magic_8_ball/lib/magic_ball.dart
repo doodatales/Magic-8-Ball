@@ -50,13 +50,13 @@ List<String> magicResponses = [
 
 class _MagicBallState extends State<MagicBall> {
   bool _visible = true;
-  late Image img;
-  Image gif1 = Image.asset("assets/images/waves_1.gif");
-  Image gif2 = Image.asset("assets/images/waves_2.gif");
-  Image gif3 = Image.asset("assets/images/waves_3.gif");
-  Image gif4 = Image.asset("assets/images/waves_4.gif");
-  Image gif5 = Image.asset("assets/images/waves_5.gif");
-  Image gif6 = Image.asset("assets/images/waves_6.gif");
+  late AssetImage img;
+  late AssetImage gif1;
+  late AssetImage gif2;
+  late AssetImage gif3;
+  late AssetImage gif4;
+  late AssetImage gif5;
+  late AssetImage gif6;
   Image magicWindow =
       Image.asset(fit: BoxFit.fitHeight, "assets/images/magic_bg.png");
   Image bottomBar = Image.asset(
@@ -103,7 +103,13 @@ class _MagicBallState extends State<MagicBall> {
 
     //_offset = widget.offset;
 
-    img = Image.asset("assets/images/empty.png");
+    img = const AssetImage("assets/images/empty.png");
+    gif1 = const AssetImage("assets/images/waves_1.gif");
+    gif2 = const AssetImage("assets/images/waves_2.gif");
+    gif3 = const AssetImage("assets/images/waves_3.gif");
+    gif4 = const AssetImage("assets/images/waves_4.gif");
+    gif5 = const AssetImage("assets/images/waves_5.gif");
+    gif6 = const AssetImage("assets/images/waves_6.gif");
 
     detector = ShakeDetector.autoStart(
       onPhoneShake: () {
@@ -121,33 +127,54 @@ class _MagicBallState extends State<MagicBall> {
         if (_diceface == 1) {
           heavyImpact();
           setState(() {
+            gif1 = const AssetImage("assets/images/waves_1.gif")..evict();
+
             img = gif1;
           });
         } else if (_diceface == 2) {
+          Future.delayed(Duration(seconds: 1), () {
+            heavyImpact();
+          });
           heavyImpact();
-          heavyImpact();
+          ;
           setState(() {
+            gif2 = const AssetImage("assets/images/waves_2.gif")..evict();
             img = gif2;
           });
         } else if (_diceface == 3) {
+          Future.delayed(Duration(seconds: 1), () {
+            lightImpact();
+          });
           heavyImpact();
           setState(() {
+            gif3 = const AssetImage("assets/images/waves_3.gif")..evict();
             img = gif3;
           });
         } else if (_diceface == 4) {
           heavyImpact();
           setState(() {
+            gif4 = const AssetImage("assets/images/waves_4.gif")..evict();
             img = gif4;
           });
         } else if (_diceface == 5) {
-          heavyImpact();
-          heavyImpact();
+          Future.delayed(Duration(seconds: 1), () {
+            heavyImpact();
+          });
+          lightImpact();
           setState(() {
+            gif5 = const AssetImage("assets/images/waves_5.gif")..evict();
             img = gif5;
           });
         } else if (_diceface == 6) {
-          heavyImpact();
+          Future.delayed(Duration(seconds: 1), () {
+            heavyImpact();
+          });
+          Future.delayed(Duration(seconds: 1), () {
+            lightImpact();
+          });
+          lightImpact();
           setState(() {
+            gif6 = const AssetImage("assets/images/waves_6.gif")..evict();
             img = gif6;
           });
         }
@@ -176,13 +203,20 @@ class _MagicBallState extends State<MagicBall> {
     );
   }
 
+  static Future<void> lightImpact() async {
+    await SystemChannels.platform.invokeMethod<void>(
+      'HapticFeedback.vibrate',
+      'HapticFeedbackType.lightImpact',
+    );
+  }
+
   bool active = false;
   Timer? timer;
   Timer? refresh;
   Stopwatch stopwatch = Stopwatch();
   Duration duration = const Duration(seconds: 2);
 
-  String result = '';
+  String result = "assets/images/response_1.png";
 
   void start() {
     setState(() {
@@ -193,7 +227,7 @@ class _MagicBallState extends State<MagicBall> {
         //holder = ending;
         _visible = false;
 
-        _diceface = _random.nextInt(20) + 1;
+        _diceface = _random.nextInt(19) + 1;
         result = magicResponses[_diceface];
       });
       stopwatch
@@ -220,6 +254,13 @@ class _MagicBallState extends State<MagicBall> {
     timer?.cancel();
     refresh?.cancel();
     stopwatch.stop();
+
+    gif1.evict();
+    gif2.evict();
+    gif3.evict();
+    gif4.evict();
+    gif5.evict();
+    gif6.evict();
     super.dispose();
   }
 
@@ -252,7 +293,7 @@ class _MagicBallState extends State<MagicBall> {
                     "assets/images/ball_hole.png",
                   )),
             ]),
-            img,
+            Image(image: img),
             holder,
             Align(
               alignment: Alignment.topCenter,
