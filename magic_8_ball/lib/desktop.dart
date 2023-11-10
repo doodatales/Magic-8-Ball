@@ -17,7 +17,10 @@ class Desktop extends StatefulWidget {
 class _DesktopState extends State<Desktop> {
   Offset _offset = Offset.zero;
 
-  Widget dragChild = FlutterLogo(textColor: Colors.green, size: 100);
+  Widget dragChild = Image.asset(
+    height: 100,
+    "assets/images/mouse.png",
+  );
 
   Widget loadingBox = Container();
 
@@ -36,11 +39,19 @@ class _DesktopState extends State<Desktop> {
   void start() {
     setState(() {
       active = true;
-      timer = Timer(duration, () {
+      timer = Timer(duration, () async {
         stop();
-        print('here');
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => MagicBall(title: "test")));
+        loadingBox = Container();
+        final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => MagicBall(offset: _offset)));
+        //if (!mounted) return;
+
+        print(result.toString());
+        setState(() {
+          _offset = result;
+        });
       });
       stopwatch
         ..reset()
@@ -71,68 +82,122 @@ class _DesktopState extends State<Desktop> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              Center(
-                child: DragTarget<bool>(
-                  builder: (
-                    BuildContext context,
-                    List<dynamic> accepted,
-                    List<dynamic> rejected,
-                  ) {
-                    return Container(
-                      height: 100.0,
-                      width: 100.0,
-                      color: Colors.cyan,
-                    );
-                  },
-                  onAccept: (bool res) {
-                    print('yay');
-
-                    setState(() {
-                      loadingBox = Container(
-                        height: 300.0,
-                        width: 300.0,
-                        color: Colors.black,
-                      );
-                      start();
-                    });
-                  },
-                ),
-              ),
-              Center(child: loadingBox),
-              Positioned(
-                left: _offset.dx,
-                top: _offset.dy,
-                child: Draggable<bool>(
-                  data: true,
-                  feedback: FlutterLogo(
-                      textColor: const Color.fromARGB(255, 150, 135, 113),
-                      size: 100),
-                  child: dragChild,
-                  onDragStarted: () {
-                    setState(() {
-                      dragChild = Container();
-                    });
-                  },
-                  onDragEnd: (details) {
-                    setState(() {
-                      final adjustment = MediaQuery.of(context).size.height -
-                          constraints.maxHeight;
-                      _offset = Offset(
-                          details.offset.dx, details.offset.dy - adjustment);
-                      dragChild =
-                          FlutterLogo(textColor: Colors.green, size: 100);
-                    });
-                  },
-                ),
-              ),
-            ],
-          );
-        },
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            fit: BoxFit.fitHeight,
+            "assets/images/desktop_bg.png",
+          ),
+          Image.asset(
+            alignment: Alignment.bottomCenter,
+            fit: BoxFit.fitWidth,
+            "assets/images/bottom_bar.png",
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                height: 100,
+                                "assets/images/folder_icon.png",
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                height: 100,
+                                "assets/images/document_icon.png",
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Image.asset(
+                                height: 100,
+                                "assets/images/empty_folder_icon.png",
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            DragTarget<bool>(
+                              builder: (
+                                BuildContext context,
+                                List<dynamic> accepted,
+                                List<dynamic> rejected,
+                              ) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.asset(
+                                    height: 100,
+                                    "assets/images/magic_icon.png",
+                                  ),
+                                );
+                              },
+                              onAccept: (bool res) {
+                                setState(() {
+                                  loadingBox = Image.asset(
+                                    "assets/images/magic_loader.png",
+                                  );
+                                  start();
+                                });
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  Center(child: loadingBox),
+                  Positioned(
+                    left: _offset.dx,
+                    top: _offset.dy,
+                    child: Draggable<bool>(
+                      data: true,
+                      feedback: Image.asset(
+                        height: 100,
+                        "assets/images/mouse.png",
+                      ),
+                      child: dragChild,
+                      onDragStarted: () {
+                        setState(() {
+                          dragChild = Container();
+                        });
+                      },
+                      onDragEnd: (details) {
+                        setState(() {
+                          final adjustment =
+                              MediaQuery.of(context).size.height -
+                                  constraints.maxHeight;
+                          _offset = Offset(details.offset.dx,
+                              details.offset.dy - adjustment);
+                          dragChild = Image.asset(
+                            height: 100,
+                            "assets/images/mouse.png",
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
     );
   }

@@ -8,7 +8,9 @@ import 'package:provider/provider.dart';
 import 'package:shake/shake.dart';
 
 class MagicBall extends StatefulWidget {
-  const MagicBall({super.key, required this.title});
+  const MagicBall({super.key, required this.offset});
+
+  final Offset offset;
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -18,8 +20,6 @@ class MagicBall extends StatefulWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
-
-  final String title;
 
   @override
   State<MagicBall> createState() => _MagicBallState();
@@ -57,13 +57,28 @@ class _MagicBallState extends State<MagicBall> {
   Image gif4 = Image.asset("assets/images/waves_4.gif");
   Image gif5 = Image.asset("assets/images/waves_5.gif");
   Image gif6 = Image.asset("assets/images/waves_6.gif");
-  Image magicWindow = Image.asset("assets/images/magic_window.png");
-  Image bottomBar = Image.asset("assets/images/bottom_bar.png");
+  Image magicWindow =
+      Image.asset(fit: BoxFit.fitHeight, "assets/images/magic_bg.png");
+  Image bottomBar = Image.asset(
+      alignment: Alignment.bottomCenter,
+      fit: BoxFit.fitWidth,
+      "assets/images/bottom_bar.png");
+  Image topBar = Image.asset(
+      alignment: Alignment.topCenter,
+      fit: BoxFit.fitWidth,
+      "assets/images/top_bar.png");
   Image ballHole = Image.asset("assets/images/ball_hole.png");
   Image triangle = Image.asset("assets/images/triangle.png");
   Image reveal = Image.asset(
       "assets/images/ball_hole.png"); // this one fades to transparent to reveal the answer, which has text color the same as bg color and a white/contrasting triangle
   Widget holder = Container();
+
+  late Offset _offset = widget.offset;
+
+  Widget dragChild = Image.asset(
+    height: 100,
+    "assets/images/mouse.png",
+  );
 /*   Widget ending = Stack(children: [
     Center(child: Image.asset("assets/images/triangle.png", height: 200)),
     Center(
@@ -85,6 +100,9 @@ class _MagicBallState extends State<MagicBall> {
 
   void initState() {
     super.initState();
+
+    //_offset = widget.offset;
+
     img = Image.asset("assets/images/empty.png");
 
     detector = ShakeDetector.autoStart(
@@ -215,12 +233,9 @@ class _MagicBallState extends State<MagicBall> {
     // than having to individually change instances of widgets.
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Stack(
+      body: LayoutBuilder(builder: (context, constraints) {
+        return Stack(
+          fit: StackFit.expand,
           alignment: Alignment.center,
           children: [
             magicWindow,
@@ -239,9 +254,56 @@ class _MagicBallState extends State<MagicBall> {
             ]),
             img,
             holder,
+            Align(
+              alignment: Alignment.topCenter,
+              child: DragTarget<bool>(
+                builder: (
+                  BuildContext context,
+                  List<dynamic> accepted,
+                  List<dynamic> rejected,
+                ) {
+                  return topBar;
+                },
+                onAccept: (bool res) {
+                  setState(() {
+                    print('offset = ' + _offset.toString());
+                    Navigator.pop(context, _offset);
+                  });
+                },
+              ),
+            ),
+            Positioned(
+              left: _offset.dx,
+              top: _offset.dy,
+              child: Draggable<bool>(
+                data: true,
+                feedback: Image.asset(
+                  height: 100,
+                  "assets/images/mouse.png",
+                ),
+                child: dragChild,
+                onDragStarted: () {
+                  setState(() {
+                    dragChild = Container();
+                  });
+                },
+                onDragEnd: (details) {
+                  setState(() {
+                    final adjustment = MediaQuery.of(context).size.height -
+                        constraints.maxHeight;
+                    _offset = Offset(
+                        details.offset.dx, details.offset.dy - adjustment);
+                    dragChild = Image.asset(
+                      height: 100,
+                      "assets/images/mouse.png",
+                    );
+                  });
+                },
+              ),
+            ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 }

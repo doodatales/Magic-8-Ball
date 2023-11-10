@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:magic_8_ball/desktop.dart';
 import 'package:magic_8_ball/magic_ball.dart';
 import 'package:provider/provider.dart';
 import 'package:shake/shake.dart';
@@ -51,9 +52,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MagicBall(
-          title:
-              'Flutter Demo Home Page'), //const Desktop(), //MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const Desktop(), //MagicBall(title: 'Flutter Demo Home Page'),
     );
   }
 }
