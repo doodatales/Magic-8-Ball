@@ -50,7 +50,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Desktop(), //MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(
+          title:
+              'Flutter Demo Home Page'), //const Desktop(), //MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
@@ -212,8 +214,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Image gif1 = Image.asset("assets/images/waves_1.gif");
   Image gif2 = Image.asset("assets/images/waves_2.gif");
   Image gif3 = Image.asset("assets/images/waves_3.gif");
+  Image gif4 = Image.asset("assets/images/waves_4.gif");
+  Image gif5 = Image.asset("assets/images/waves_5.gif");
+  Image gif6 = Image.asset("assets/images/waves_6.gif");
+  Image magicWindow = Image.asset("assets/images/magic_window.png");
+  Image ballHole = Image.asset("assets/images/ball_hole.png");
+  Image triangle = Image.asset("assets/images/triangle.png");
   Image ending1 = Image.asset(
-      "assets/images/ending_1.gif"); // this one fades to transparent to reveal the answer, which has text color the same as bg color and a white/contrasting triangle
+      "assets/images/reveal.gif"); // this one fades to transparent to reveal the answer, which has text color the same as bg color and a white/contrasting triangle
 
   static var _random = new Random();
   static var _diceface = _random.nextInt(3) + 1;
